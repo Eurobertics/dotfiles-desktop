@@ -142,8 +142,7 @@
 | `Q` | Yazi beenden + ins zuletzt besuchte Verzeichnis wechseln |
 | `F1` | Hilfe (alle Keybinds) |
 | `~` | Home-Verzeichnis |
-
-> `Q` ist besonders nützlich wenn du yazi aus kitty heraus startest (`SUPER+E`): du landest nach dem Beenden direkt im Verzeichnis das du zuletzt in yazi hattest.
+| `T` | Terminal im aktuellen Verzeichnis öffnen |
 
 ---
 
