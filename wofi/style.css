@@ -1,0 +1,58 @@
+window {
+    background-color: rgba(10, 10, 30, 0.90);
+    border: 1px solid rgba(192, 132, 252, 0.8);
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(192, 132, 252, 0.5),
+                0 0 40px rgba(108, 92, 231, 0.2);
+}
+
+#input {
+    background-color: rgba(30, 30, 60, 0.8);
+    border: 1px solid rgba(108, 92, 231, 0.4);
+    border-radius: 10px;
+    color: #e2e8f0;
+    padding: 8px 12px;
+    margin: 8px;
+    font-family: "MesloLGS Nerd Font";
+    font-size: 14px;
+}
+
+#input:focus {
+    border-color: rgba(0, 212, 255, 0.7);
+    outline: none;
+}
+
+#scroll {
+    margin: 4px 8px;
+}
+
+#inner-box {
+    background-color: transparent;
+}
+
+#outer-box {
+    padding: 8px;
+}
+
+#entry {
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin: 2px 4px;
+    color: #e2e8f0;
+}
+
+#entry:selected {
+    background: linear-gradient(90deg, rgba(108, 92, 231, 0.4), rgba(0, 212, 255, 0.2));
+    border: 1px solid rgba(108, 92, 231, 0.5);
+    color: #ffffff;
+}
+
+#text {
+    color: #e2e8f0;
+    font-family: "MesloLGS Nerd Font";
+    font-size: 13px;
+}
+
+#text:selected {
+    color: #ffffff;
+}

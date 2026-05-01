@@ -1,0 +1,20 @@
+#!/bin/bash
+BRIGHTNESS="/sys/devices/platform/tuxedo_keyboard/leds/rgb:kbd_backlight/brightness"
+MAX=$(cat /sys/devices/platform/tuxedo_keyboard/leds/rgb:kbd_backlight/max_brightness)
+CURRENT=$(cat $BRIGHTNESS)
+
+case "$1" in
+    up)
+        NEW=$(( CURRENT + MAX / 5 ))
+        [ $NEW -gt $MAX ] && NEW=$MAX
+        echo "$NEW" | tee $BRIGHTNESS > /dev/null
+        ;;
+    down)
+        NEW=$(( CURRENT - MAX / 5 ))
+        [ $NEW -lt 0 ] && NEW=0
+        echo "$NEW" | tee $BRIGHTNESS > /dev/null
+        ;;
+    on)  echo "$MAX" | tee $BRIGHTNESS > /dev/null ;;
+    off) echo "0"    | tee $BRIGHTNESS > /dev/null ;;
+    *)   echo "$1"   | tee $BRIGHTNESS > /dev/null ;;
+esac

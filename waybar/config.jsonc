@@ -1,0 +1,92 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 32,
+    "spacing": 6,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/tidal"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "wireplumber",
+        "network",
+        "power-profiles-daemon",
+        "battery",
+        "custom/gpu",
+        "tray"
+    ],
+
+    "hyprland/workspaces": {
+        "format": "{id}",
+        "on-click": "activate",
+        "sort-by-number": true
+    },
+
+    "custom/tidal": {
+        "format": "{}",
+        "exec": "playerctl -p tidal-hifi metadata --format '{{artist}} - {{title}}' 2>/dev/null || echo 'Kein Titel'",
+        "interval": 2,
+        "on-click": "playerctl -p tidal-hifi play-pause",
+        "on-scroll-up": "playerctl -p tidal-hifi next",
+        "on-scroll-down": "playerctl -p tidal-hifi previous",
+        "max-length": 50
+    },
+
+    "custom/gpu": {
+        "exec": "gpu-status",
+        "interval": 60,
+        "format": "{}",
+        "tooltip-format": "Aktuelle GPU"
+    },
+
+    "power-profiles-daemon": {
+        "format": "{icon}",
+        "tooltip-format": "Profil: {profile}",
+        "format-icons": {
+            "default": "",
+            "performance": "\udb86\ude88",
+            "balanced": "\udb81\udda7",
+            "power-saver": "\udb84\udea3"
+        }
+    },
+
+    "wireplumber": {
+        "format": "{icon} {volume}%",
+        "format-muted": "\ueee8",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "max-volume": 100,
+        "format-icons": ["\uf026", "\uf027", "\uf028"]
+    },
+
+    "network": {
+        "format-wifi": "\uf1eb {signalStrength}%",
+        "format-ethernet": " \udb80\ude00",
+        "format-disconnected": " \udb80\udf19",
+        "tooltip-format": "{essid}\n{ipaddr}\nSignal: {signalStrength}%"
+    },
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "\ueea1 {capacity}%",
+        "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"]
+    },
+
+    "clock": {
+        "format": "{:%d.%m.%Y %H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    "tray": {
+        "spacing": 8
+    }
+}

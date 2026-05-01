@@ -1,0 +1,9 @@
+#!/bin/bash
+BRIGHTNESS="/sys/devices/platform/tuxedo_keyboard/leds/rgb:kbd_backlight/brightness"
+CURRENT=$(cat $BRIGHTNESS)
+
+if [ "$CURRENT" -gt "0" ]; then
+    echo "0" | tee $BRIGHTNESS > /dev/null
+else
+    echo "255" | tee $BRIGHTNESS > /dev/null
+fi

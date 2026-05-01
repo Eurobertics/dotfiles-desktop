@@ -1,0 +1,93 @@
+# ==================
+# Allgemein
+# ==================
+set editor = "nvim"
+set charset = "utf-8"
+set send_charset = "utf-8"
+set date_format = "%d.%m.%Y %H:%M"
+set index_format = "%2C %Z %d %-20.20F %s"
+set sort = threads
+set sort_aux = reverse-last-date-received
+set pager_index_lines = 10
+set pager_context = 5
+set markers = no
+
+# HTML Mails
+auto_view text/html
+alternative_order text/plain text/enriched text/html
+
+# ==================
+# Standard - VOR mailboxes!
+# ==================
+set mbox_type = Maildir
+set folder = "~/.local/share/mail"
+set spoolfile = "~/.local/share/mail/account1/INBOX"
+set record = "~/.local/share/mail/account1/Sent"
+set postponed = "~/.local/share/mail/account1/Drafts"
+set trash = "~/.local/share/mail/account1/Trash"
+set sendmail = "msmtp --account=account1"
+
+# ==================
+# Mailboxen
+# ==================
+mailboxes "~/.local/share/mail/account1/INBOX" \
+    "~/.local/share/mail/account1/Sent" \
+    "~/.local/share/mail/account1/Drafts" \
+    "~/.local/share/mail/account1/Trash" \
+    "~/.local/share/mail/account1/Spam"
+
+mailboxes "~/.local/share/mail/account2/INBOX" \
+    "~/.local/share/mail/account2/Sent" \
+    "~/.local/share/mail/account2/Drafts" \
+    "~/.local/share/mail/account2/Trash" \
+    "~/.local/share/mail/account2/Spam"
+
+# ==================
+# account1.net
+# ==================
+account-hook "account1" "set from='YOUR_EMAIL_1@DOMAIN1' \
+    realname='Bernd Robertz' \
+    smtp_url='smtps://YOUR_EMAIL_1@DOMAIN1@YOUR_SMTP_HOST_1:465' \
+    smtp_pass=`secret-tool lookup service smtp-account1 username YOUR_EMAIL_1@DOMAIN1`"
+
+# ==================
+# account2.de
+# ==================
+account-hook "account2" "set from='YOUR_EMAIL_2@DOMAIN2' \
+    realname='Bernd Robertz' \
+    smtp_url='smtps://YOUR_EMAIL_2@DOMAIN2@YOUR_SMTP_HOST_2:465' \
+    smtp_pass=`secret-tool lookup service smtp-account2 username YOUR_EMAIL_2@DOMAIN2`"
+
+# ==================
+# Identitäten
+# ==================
+alternates YOUR_EMAIL_1@DOMAIN1|YOUR_EMAIL_2@DOMAIN2
+unset reply_to
+set reverse_name = yes
+set reverse_realname = yes
+
+# ==================
+# Konto: account1 (Standard, F1)
+# ==================
+macro index <F1> "<sync-mailbox>\
+<enter-command>set spoolfile='~/.local/share/mail/account1/INBOX'<enter>\
+<enter-command>set record='~/.local/share/mail/account1/Sent'<enter>\
+<enter-command>set postponed='~/.local/share/mail/account1/Drafts'<enter>\
+<enter-command>set trash='~/.local/share/mail/account1/Trash'<enter>\
+<enter-command>set sendmail='msmtp --account=account1'<enter>\
+<enter-command>set from='YOUR_EMAIL_1@DOMAIN1'<enter>\
+<enter-command>set realname='Bernd Robertz'<enter>\
+<change-folder>!<enter>" "Wechsel zu account1.net"
+
+# ==================
+# Konto: account2 (F2)
+# ==================
+macro index <F2> "<sync-mailbox>\
+<enter-command>set spoolfile='~/.local/share/mail/account2/INBOX'<enter>\
+<enter-command>set record='~/.local/share/mail/account2/Sent'<enter>\
+<enter-command>set postponed='~/.local/share/mail/account2/Drafts'<enter>\
+<enter-command>set trash='~/.local/share/mail/account2/Trash'<enter>\
+<enter-command>set sendmail='msmtp --account=account2'<enter>\
+<enter-command>set from='YOUR_EMAIL_2@DOMAIN2'<enter>\
+<enter-command>set realname='Bernd Robertz'<enter>\
+<change-folder>!<enter>" "Wechsel zu account2.de"

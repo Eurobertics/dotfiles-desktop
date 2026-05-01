@@ -1,0 +1,11 @@
+#!/bin/bash
+INTENSITY="/sys/devices/platform/tuxedo_keyboard/leds/rgb:kbd_backlight/multi_intensity"
+
+case "$1" in
+    red)    echo "255 0 0"     | tee $INTENSITY > /dev/null ;;
+    green)  echo "0 255 0"     | tee $INTENSITY > /dev/null ;;
+    blue)   echo "0 0 255"     | tee $INTENSITY > /dev/null ;;
+    white)  echo "255 255 255" | tee $INTENSITY > /dev/null ;;
+    off)    echo "0 0 0"       | tee $INTENSITY > /dev/null ;;
+    *)      echo "$1"          | tee $INTENSITY > /dev/null ;;
+esac

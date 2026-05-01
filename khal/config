@@ -1,0 +1,28 @@
+[calendars]
+
+[[personal]]
+path = ~/.local/share/calendars/personal/
+color = light blue
+
+[[aufgaben]]
+path = ~/.local/share/calendars/aufgaben/
+color = light green
+
+[[contact_birthdays]]
+path = ~/.local/share/calendars/contact_birthdays/
+color = light red
+readonly = True
+
+[sqlite]
+path = ~/.local/share/khal/khal.db
+
+[locale]
+timeformat = %H:%M
+dateformat = %d.%m.%Y
+longdateformat = %d.%m.%Y
+datetimeformat = %d.%m.%Y %H:%M
+longdatetimeformat = %d.%m.%Y %H:%M
+firstweekday = 0
+
+[default]
+default_calendar = personal

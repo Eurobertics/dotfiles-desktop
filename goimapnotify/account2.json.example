@@ -1,0 +1,10 @@
+{
+  "host": "YOUR_IMAP_HOST_2",
+  "port": 993,
+  "tls": true,
+  "username": "YOUR_EMAIL_2@DOMAIN2",
+  "passwordCmd": "secret-tool lookup service imap-account2 username YOUR_EMAIL_2@DOMAIN2",
+  "onNewMail": "notify-send 'Neue Mail' 'YOUR_EMAIL_2@DOMAIN2' && mbsync account2",
+  "onNewMailPost": "",
+  "boxes": ["INBOX"]
+}

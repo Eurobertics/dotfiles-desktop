@@ -1,0 +1,16 @@
+# Keine echten Credentials
+goimapnotify/*.json
+!goimapnotify/*.json.example
+
+# Kein Cache / Laufzeit-Ballast
+*.pyc
+__pycache__/
+node-compile-cache/
+*.lock
+
+# Kein Wallpaper (zu groß)
+hypr/wallpaper.*
+hypr/*.png
+hypr/*.jpg
+hypr/*.jpeg
+hypr/*.webp

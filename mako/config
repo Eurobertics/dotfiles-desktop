@@ -1,0 +1,16 @@
+background-color=#0a0a1eee
+text-color=#e2e8f0
+border-color=#6C5CE7
+border-size=1
+border-radius=12
+padding=12
+margin=8
+font=MesloLGS Nerd Font 12
+width=350
+height=100
+anchor=top-right
+
+[urgency=high]
+background-color=#1a0a0aee
+border-color=#f87171
+text-color=#f87171
