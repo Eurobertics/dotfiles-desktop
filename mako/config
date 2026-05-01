@@ -9,8 +9,11 @@ font=MesloLGS Nerd Font 12
 width=350
 height=100
 anchor=top-right
+default-timeout=5000
+ignore-timeout=1
 
 [urgency=high]
 background-color=#1a0a0aee
 border-color=#f87171
 text-color=#f87171
+

@@ -1,0 +1,25 @@
+#!/bin/bash
+STATUS=$(playerctl -p tidal-hifi status 2>/dev/null)
+
+if [ -n "$STATUS" ]; then
+    ARTIST=$(playerctl -p tidal-hifi metadata artist 2>/dev/null)
+    TITLE=$(playerctl -p tidal-hifi metadata title 2>/dev/null)
+
+    # Escape ampersands for Pango markup if needed, though playerctl usually handles this
+    DISPLAY="${ARTIST} - ${TITLE}"
+
+    if [ "$STATUS" = "Playing" ]; then
+        CLASS="playing"
+        ICON=$'\uf04b '
+    elif [ "$STATUS" = "Paused" ]; then
+        CLASS="paused"
+        ICON=$'\uf04c '
+    else
+        CLASS="no-player"
+        ICON=$'\udb81\udf5b '
+    fi
+
+    echo "{\"text\": \"${ICON}${DISPLAY}\", \"tooltip\": \"${DISPLAY}\", \"class\": \"${CLASS}\"}" 
+else
+    echo '{"text": "Kein Titel", "tooltip": "Kein Titel", "class": "no-player"}'
+fi
