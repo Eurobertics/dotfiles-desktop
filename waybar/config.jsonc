@@ -66,9 +66,10 @@
 
     "network": {
         "format-wifi": "\uf1eb {signalStrength}%",
-        "format-ethernet": " \udb80\ude00",
-        "format-disconnected": " \udb80\udf19",
-        "tooltip-format": "{essid}\n{ipaddr}\nSignal: {signalStrength}%"
+        "format-ethernet": "\udb80\ude00",
+        "format-disconnected": "\udb80\udf19",
+        "tooltip-format-ethernet": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}",
+        "tooltip-format-wifi": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\nNetwork: {essid}\nSignal: {signalStrength}%"
     },
 
     "battery": {
