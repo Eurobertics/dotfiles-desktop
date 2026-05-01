@@ -19,7 +19,8 @@
         "power-profiles-daemon",
         "battery",
         "custom/gpu",
-        "tray"
+        "tray",
+        "custom/power"
     ],
 
     "hyprland/workspaces": {
@@ -93,5 +94,18 @@
 
     "tray": {
         "spacing": 8
+    },
+
+    "custom/power": {
+        "format": "\u23fb",
+        "tooltip": false,
+        "menu": "on-click",
+        "menu-file": "~/.config/waybar/power_menu.xml",
+        "menu-actions": {
+            "shutdown": "shutdown",
+            "reboot": "reboot",
+            "suspend": "systemctl suspend",
+            "hibernate": "systemctl hibernate"
+        }
     }
 }
