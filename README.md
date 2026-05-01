@@ -1,5 +1,7 @@
 # eurobertics/dotfiles-desktop
 
+![EmberNet Desktop](screenshot.jpg)
+
 Hyprland Desktop Setup auf CachyOS. Terminal-zentrierter Workflow mit EmberNet Theme.
 
 > Für das Neovim/DevContainer/Server Setup → [eurobertics/dotfiles](https://github.com/eurobertics/dotfiles)
