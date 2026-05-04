@@ -1,0 +1,11 @@
+#!/bin/bash
+# battery-mode.sh
+STATUS=$(cat /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode)
+
+if [ "$STATUS" = "1" ]; then
+    echo 0 | sudo tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode
+    notify-send "Akku" "Ladelimit aufgehoben – lädt auf 100%"
+else
+    echo 1 | sudo tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode
+    notify-send "Akku" "Conservation Mode aktiv – Limit 80%"
+fi

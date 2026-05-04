@@ -7,20 +7,20 @@ logfile        ~/.local/share/msmtp/msmtp.log
 
 # account1.net
 account account1
-host YOUR_SMTP_HOST_1
+host YOUR_IMAP_HOST_1
 port 465
 tls_starttls off
-from YOUR_EMAIL_1@DOMAIN1
-user YOUR_EMAIL_1@DOMAIN1
+from bernd@brobertz.net
+user bernd@brobertz.net
 passwordeval secret-tool lookup service smtp-account1 username YOUR_EMAIL_1@DOMAIN1
 
 # account2.de
 account account2
-host YOUR_SMTP_HOST_2
+host YOUR_IMAP_HOST_2
 port 465
 tls_starttls off
-from YOUR_EMAIL_2@DOMAIN2
-user YOUR_EMAIL_2@DOMAIN2
+from b.robertz@valueforce.de
+user b.robertz@valueforce.de
 passwordeval secret-tool lookup service smtp-account2 username YOUR_EMAIL_2@DOMAIN2
 
 account default : account1

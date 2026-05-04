@@ -1,0 +1,19 @@
+#!/bin/bash
+# brightness.sh
+ACTION=$1  # "up" oder "down"
+
+if [ -d /sys/class/backlight/intel_backlight ]; then
+    DEVICE="intel_backlight"
+else
+    DEVICE="nvidia_0"
+fi
+
+if [ "$ACTION" = "up" ]; then
+    brightnessctl -d $DEVICE set 5%+
+else
+    brightnessctl -d $DEVICE set 5%-
+fi
+
+# Aktuellen Prozentwert auslesen und swayosd informieren
+CURRENT=$(brightnessctl -d $DEVICE -m | cut -d',' -f4 | tr -d '%')
+swayosd-client --brightness $CURRENT

@@ -1,6 +1,6 @@
 #!/bin/bash
 case $(envycontrol --query) in
-    integrated) echo $'\uf4bc AMD' ;;
-    hybrid)     echo $'\udb82\uddfe Hybrid' ;;
-    nvidia)     echo $'\udb84\udd04 NVIDIA' ;;
+    integrated) printf '\U000F4BC Intel\n' ;;
+    hybrid)     printf '\U000F09FE Hybrid\n' ;;
+    nvidia)     printf '\U000F1104 NVIDIA' ;;
 esac

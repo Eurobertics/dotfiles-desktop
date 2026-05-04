@@ -14,3 +14,9 @@ hypr/*.png
 hypr/*.jpg
 hypr/*.jpeg
 hypr/*.webp
+
+# Keine Dateien mit persoenlichen Date
+mbsync/mbsyncrc
+msmtp/config
+neomutt/neomuttrc
+vdirsyncer/config

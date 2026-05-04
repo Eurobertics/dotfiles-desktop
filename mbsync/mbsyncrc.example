@@ -1,0 +1,54 @@
+# Globale Einstellungen
+Create Both
+Expunge Both
+SyncState *
+
+# ==================
+# Account 1
+# ==================
+IMAPAccount account1
+Host YOUR_IMAP_HOST_1
+Port 993
+User YOUR_EMAIL_1@DOMAIN1
+PassCmd "secret-tool lookup service imap-account1 username YOUR_EMAIL_1@DOMAIN1
+SSLType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore account1-remote
+Account account1
+
+MaildirStore account1-local
+Path ~/.local/share/mail/account1/
+Inbox ~/.local/share/mail/account1/INBOX
+
+Channel account1
+Far :account1-remote:
+Near :account1-local:
+Patterns *
+Create Both
+SyncState *
+
+# ==================
+# Account 2
+# ==================
+IMAPAccount account2
+Host YOUR_IMAP_HOST_2
+Port 993
+User YOUR_EMAIL_2@DOMAIN2
+PassCmd "secret-tool lookup service imap-account2 username YOUR_EMAIL_2@DOMAIN2
+SSLType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore account2-remote
+Account account2
+
+MaildirStore account2-local
+Path ~/.local/share/mail/account2/
+Inbox ~/.local/share/mail/account2/INBOX
+
+Channel account2
+Far :account2-remote:
+Near :account2-local:
+Patterns *
+Create Both
+SyncState *

@@ -40,6 +40,8 @@ chmod +x install.sh
 
 Pakete vorher installieren – siehe [packages.md](packages.md).
 
+Das Script legt alle Symlinks an und erstellt benötigte Verzeichnisse (inkl. `~/.local/share/mail/`).
+
 ---
 
 ## Konfiguration nach Installation
@@ -56,7 +58,21 @@ secret-tool store --label="SMTP Account 1" service smtp-account1 username YOUR_E
 secret-tool store --label="SMTP Account 2" service smtp-account2 username YOUR_EMAIL_2@DOMAIN2
 ```
 
-### 2. Mail-Configs anpassen
+### 2. mbsync konfigurieren
+
+Platzhalter in `~/.mbsyncrc` ersetzen (Symlink auf `mbsync/mbsyncrc` im Repo):
+
+- `YOUR_IMAP_HOST_1` / `YOUR_IMAP_HOST_2` – IMAP-Hostname des Mailservers
+- `YOUR_EMAIL_1@DOMAIN1` / `YOUR_EMAIL_2@DOMAIN2` – E-Mail-Adressen
+- `account1` / `account2` – sprechende Namen für die Postfächer
+
+Die Mailverzeichnisse werden automatisch vom `install.sh` angelegt:
+```
+~/.local/share/mail/account1/
+~/.local/share/mail/account2/
+```
+
+### 3. Mail-Configs anpassen
 
 Platzhalter in diesen Dateien ersetzen:
 
@@ -70,7 +86,7 @@ cp ~/.dotfiles-desktop/goimapnotify/account2.json.example ~/.config/goimapnotify
 # Dann beide Dateien mit Editor anpassen
 ```
 
-### 3. vdirsyncer anpassen
+### 4. vdirsyncer anpassen
 
 ```bash
 # ~/.config/vdirsyncer/config
@@ -78,24 +94,29 @@ cp ~/.dotfiles-desktop/goimapnotify/account2.json.example ~/.config/goimapnotify
 # App-Password in Nextcloud unter Einstellungen → Sicherheit erstellen
 ```
 
-### 4. mbsync initialisieren
+### 5. mbsync initialisieren
 
 ```bash
 mbsync -a
 ```
 
-### 5. Systemd Timer aktivieren
+### 6. Systemd Timer aktivieren
 
 ```bash
 systemctl --user enable --now mbsync.timer
 systemctl --user enable --now vdirsyncer.timer
 ```
 
-### 6. vdirsyncer initialisieren
+### 7. vdirsyncer initialisieren
 
 ```bash
 vdirsyncer discover
 vdirsyncer sync
+```
+
+### 8. pcscd starten
+```bash
+sudo systemctl --user enable --now pcscd.service
 ```
 
 ---
@@ -128,8 +149,9 @@ Alle Cheat Sheets liegen unter `docs/`:
 ## Hinweise
 
 - Wallpaper liegt **nicht** im Repo (zu groß). `hyprpaper.conf` anpassen.
-- `tuxedo-drivers-dkms` ist Tuxedo-Hardware spezifisch. Nach jedem Kernel-Update neu kompilieren – siehe `packages.md`.
+- `tuxedo-drivers-dkms` ist Tuxedo-Hardware spezifisch – auf anderen Geräten überspringen.
 - goimapnotify JSON-Dateien im Repo sind `.example` Dateien ohne echte Zugangsdaten.
+- `.mbsyncrc` liegt im Home-Verzeichnis (nicht in `~/.config/`) – so erwartet es mbsync.
 
 ---
 

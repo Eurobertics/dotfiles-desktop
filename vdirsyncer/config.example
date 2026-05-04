@@ -13,9 +13,9 @@ fileext = ".vcf"
 
 [storage contacts_remote]
 type = "carddav"
-url = "https://YOUR_NEXTCLOUD_URL/remote.php/dav"
-username = "YOUR_USERNAME"
-password = "YOUR_APP_PASSWORD"
+url = "https://NEXTCLOUD_URL/remote.php/dav"
+username = "USERNAME"
+password = "PASSWORD"
 
 [pair calendar]
 a = "calendar_local"
@@ -29,6 +29,6 @@ fileext = ".ics"
 
 [storage calendar_remote]
 type = "caldav"
-url = "https://YOUR_NEXTCLOUD_URL/remote.php/dav"
-username = "YOUR_USERNAME"
-password = "YOUR_APP_PASSWORD"
+url = "https://NEXTCLOUD_URL/remote.php/dav"
+username = "USERNAME"
+password = "PASSWORD"

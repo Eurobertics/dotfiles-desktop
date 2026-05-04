@@ -47,7 +47,7 @@ mailboxes "~/.local/share/mail/account2/INBOX" \
 # ==================
 account-hook "account1" "set from='YOUR_EMAIL_1@DOMAIN1' \
     realname='Bernd Robertz' \
-    smtp_url='smtps://YOUR_EMAIL_1@DOMAIN1@YOUR_SMTP_HOST_1:465' \
+    smtp_url='smtps://YOUR_EMAIL_1@DOMAIN1@YOUR_IMAP_HOST_1:465' \
     smtp_pass=`secret-tool lookup service smtp-account1 username YOUR_EMAIL_1@DOMAIN1`"
 
 # ==================
