@@ -32,6 +32,7 @@ rm -f "$HOME/.config/waybar/config.jsonc"
 rm -f "$HOME/.config/waybar/style.css"
 ln -sf "$DOTFILES/waybar/config.jsonc" "$HOME/.config/waybar/config.jsonc"
 ln -sf "$DOTFILES/waybar/style.css"    "$HOME/.config/waybar/style.css"
+ln -sf "$DOTFILES/waybar/power_menu.xml"    "$HOME/.config/waybar/power_menu.xml"
 echo " [ok] Waybar"
 
 # ==================

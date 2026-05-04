@@ -1,0 +1,11 @@
+#!/bin/bash
+MUTE=$(pactl get-source-mute @DEFAULT_SOURCE@ | awk '{print $2}')
+ICON_ON=$(printf '\U000F036C')
+ICON_OFF=$(printf '\U000F036D')
+
+if [ "$MUTE" = "yes" ]; then
+    echo "{\"text\": \"${ICON_OFF}\", \"tooltip\": \"Mikrofon stumm\", \"class\": \"muted\"}"
+else
+    VOLUME=$(pactl get-source-volume @DEFAULT_SOURCE@ | awk '/Volume:/ {print $5}' | tr -d '%')
+    echo "{\"text\": \"${ICON_ON} ${VOLUME}%\", \"tooltip\": \"Mikrofon aktiv: ${VOLUME}%\", \"class\": \"active\"}"
+fi

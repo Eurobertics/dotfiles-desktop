@@ -23,6 +23,7 @@ window#waybar {
 #workspaces,
 #custom-tidal,
 #clock,
+#custom-mic,
 #wireplumber,
 #network,
 #power-profiles-daemon,
@@ -84,6 +85,28 @@ window#waybar {
     font-weight: bold;
 }
 
+/* Mikrofon */
+#custom-mic {
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.3);
+    background-color: rgba(10, 10, 30, 0.75);
+    border-radius: 12px;
+    padding: 2px 12px;
+    margin: 4px 3px;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+#custom-mic.muted {
+    color: #fca5a5;
+    background-color: rgba(220, 38, 38, 0.25);
+    border-color: rgba(220, 38, 38, 0.5);
+}
+
+#custom-mic:hover {
+    background-color: rgba(108, 92, 231, 0.2);
+    border-color: rgba(108, 92, 231, 0.6);
+}
+
 /* Lautstärke */
 #wireplumber {
     color: #00d4ff;
@@ -98,13 +121,18 @@ window#waybar {
 
 /* Netzwerk */
 #network {
-    color: #00d4ff;
-    border-color: rgba(0, 212, 255, 0.3);
+    color: #fb923c;
+    border-color: rgba(251, 146, 60, 0.3);
 }
 
 #network.disconnected {
     color: #f53c3c;
     border-color: rgba(245, 60, 60, 0.3);
+}
+
+#network:hover {
+    background-color: rgba(108, 92, 231, 0.2);
+    border-color: rgba(108, 92, 231, 0.6);
 }
 
 /* Power Profile */

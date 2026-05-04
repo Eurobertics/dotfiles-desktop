@@ -14,6 +14,7 @@
     ],
 
     "modules-right": [
+        "custom/mic",
         "wireplumber",
         "network",
         "power-profiles-daemon",
@@ -58,6 +59,15 @@
             "balanced": "\udb81\udda7",
             "power-saver": "\udb84\udea3"
         }
+    },
+
+    "custom/mic": {
+        "exec": "~/.local/bin/mic-status",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 1,
+        "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle && pkill -RTMIN+1 waybar",
+        "tooltip": true
     },
 
     "wireplumber": {
