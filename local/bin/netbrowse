@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Small local network browser for Hyprland/Yazi workflows.
+# Requires: avahi, fzf, gio/gvfs, iproute2
+
+menu() {
+  printf '%s\n' \
+    "SMB Shares / Hosts" \
+    "SSH Hosts" \
+    "FTP Hosts" \
+    "HTTP Services" \
+    "All Avahi Services" \
+    "Network Interfaces" \
+    "LAN Hosts via ARP"
+}
+
+browse_avahi_type() {
+  local type="$1"
+  local action="${2:-details}"
+
+  local selected
+  selected="$(
+    avahi-browse -rt "$type" 2>/dev/null \
+      | awk '
+        /^=/ { name=$4; service=$5; proto=$6; domain=$7 }
+        /hostname =/ { host=$3; gsub(/\[|\]/,"",host) }
+        /address =/ { addr=$3; gsub(/\[|\]/,"",addr) }
+        /port =/ { port=$3; gsub(/\[|\]/,"",port) }
+        /txt =/ { txt=$0 }
+        /port =/ {
+          printf "%-18s %-16s %-8s %s\n", addr, host, port, name
+        }
+      ' \
+      | sort -u \
+      | fzf --prompt="Select service: "
+  )"
+
+  [[ -z "${selected:-}" ]] && exit 0
+
+  local ip host port name
+  ip="$(awk '{print $1}' <<< "$selected")"
+  host="$(awk '{print $2}' <<< "$selected")"
+  port="$(awk '{print $3}' <<< "$selected")"
+  name="$(cut -d' ' -f4- <<< "$selected")"
+
+  case "$action" in
+    smb)
+      gio mount "smb://${host:-$ip}" || gio mount "smb://${ip}"
+      yazi "/run/user/$UID/gvfs/"
+      ;;
+    ssh)
+      exec kitty ssh "${host:-$ip}"
+      ;;
+    ftp)
+      gio mount "ftp://${host:-$ip}:${port}"
+      yazi "/run/user/$UID/gvfs/"
+      ;;
+    http)
+      xdg-open "http://${host:-$ip}:${port}" >/dev/null 2>&1 &
+      ;;
+    details|*)
+      printf '\nIP:   %s\nHost: %s\nPort: %s\nName: %s\n\n' "$ip" "$host" "$port" "$name"
+      read -rp "Press Enter to close..."
+      ;;
+  esac
+}
+
+show_interfaces() {
+  ip -br addr | fzf --prompt="Network interfaces: " --preview 'ip addr show {1}'
+}
+
+lan_hosts() {
+  local iface
+  iface="$(ip route | awk '/default/ {print $5; exit}')"
+
+  if command -v arp-scan >/dev/null 2>&1; then
+    sudo arp-scan --localnet --interface="$iface" \
+      | awk '/^[0-9]+\./ {print $1 "  " $2 "  " substr($0, index($0,$3))}' \
+      | fzf --prompt="LAN hosts: "
+  else
+    ip neigh | fzf --prompt="LAN neighbors: "
+  fi
+}
+
+choice="$(menu | fzf --prompt="netbrowse: ")"
+
+case "$choice" in
+  "SMB Shares / Hosts")
+    browse_avahi_type "_smb._tcp" "smb"
+    ;;
+  "SSH Hosts")
+    browse_avahi_type "_ssh._tcp" "ssh"
+    ;;
+  "FTP Hosts")
+    browse_avahi_type "_ftp._tcp" "ftp"
+    ;;
+  "HTTP Services")
+    browse_avahi_type "_http._tcp" "http"
+    ;;
+  "All Avahi Services")
+    avahi-browse -art | fzf --prompt="All Avahi services: "
+    ;;
+  "Network Interfaces")
+    show_interfaces
+    ;;
+  "LAN Hosts via ARP")
+    lan_hosts
+    ;;
+esac

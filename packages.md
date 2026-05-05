@@ -163,6 +163,14 @@ sudo systemctl enable sddm
 
 ---
 
+## Netzwerkpakete bei bedarf
+
+```bash
+sudo pacman -S gvfs gvfs-smb gvfs-nfs gvfs-dnssd gvfs-wsdd cifs-utils
+```
+
+---
+
 ## Tuxedo Keyboard (nach Kernel-Update neu kompilieren)
 
 ```bash
