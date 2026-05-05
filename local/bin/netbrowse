@@ -3,6 +3,81 @@ set -euo pipefail
 
 # Small local network browser for Hyprland/Yazi workflows.
 # Requires: avahi, fzf, gio/gvfs, iproute2
+# Optional: arp-scan, nmap, kitty, yazi, xdg-utils
+
+
+script_path() {
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$0"
+  else
+    readlink -f "$0"
+  fi
+}
+
+device_hint() {
+  local host="${1:-}"
+  local vendor="${2:-}"
+  local service="${3:-}"
+  local name="${4:-}"
+  local type="${5:-}"
+  local txt="${6:-}"
+  local input
+  input="${host} ${vendor} ${service} ${name} ${type} ${txt}"
+
+  case "$input" in
+    *[_]googlecast._tcp*|*Google*|*Nest*|*Chromecast*)
+      printf 'Google/Nest/Chromecast candidate\nConfidence: high if service is _googlecast._tcp, otherwise medium\nReason: Google/Nest/Chromecast marker in vendor, service, host or TXT record\n'
+      ;;
+    *fritz.box*|*FRITZ*|*AVM*)
+      printf 'FritzBox / AVM device\nConfidence: high\nReason: AVM/Fritz marker in hostname or vendor\n'
+      ;;
+    *Raspberry*|*raspberry*|*RPI*|*rpi*)
+      printf 'Raspberry Pi candidate\nConfidence: medium\nReason: Raspberry marker in hostname/vendor/service data\n'
+      ;;
+    *[_]airplay._tcp*|*[_]raop._tcp*|*Apple*)
+      printf 'Apple / AirPlay device\nConfidence: high if AirPlay/RAOP service is present, otherwise medium\nReason: Apple/AirPlay marker in service or vendor\n'
+      ;;
+    *[_]ipp._tcp*|*[_]printer._tcp*|*Printer*|*printer*|*HP*|*Brother*|*Canon*|*Epson*)
+      printf 'Printer / network printing device\nConfidence: high if IPP/printer service is present, otherwise medium\nReason: printer marker in service, TXT record or vendor\n'
+      ;;
+    *[_]ssh._tcp*)
+      printf 'SSH-capable host\nConfidence: high\nReason: _ssh._tcp service announced via Avahi\n'
+      ;;
+    *[_]smb._tcp*|*Samba*|*samba*)
+      printf 'SMB/Samba file sharing host\nConfidence: high\nReason: SMB/Samba service announced or named\n'
+      ;;
+    *[_]nfs._tcp*)
+      printf 'NFS file sharing host\nConfidence: high\nReason: NFS service announced via Avahi\n'
+      ;;
+    *[_]http._tcp*|*[_]https._tcp*)
+      printf 'Web service / device web UI candidate\nConfidence: medium\nReason: HTTP/HTTPS service announced via Avahi\n'
+      ;;
+    *[_]workstation._tcp*)
+      printf 'Generic workstation / Linux desktop host\nConfidence: medium\nReason: generic workstation announcement\n'
+      ;;
+    *Samsung*)
+      printf 'Samsung device candidate\nConfidence: medium\nReason: Samsung vendor/name marker\n'
+      ;;
+    *Amazon*|*Echo*|*Alexa*)
+      printf 'Amazon Echo / Alexa / Fire device candidate\nConfidence: medium\nReason: Amazon/Echo/Alexa marker\n'
+      ;;
+    *Sonos*)
+      printf 'Sonos audio device candidate\nConfidence: medium\nReason: Sonos marker\n'
+      ;;
+    *Philips*Hue*|*hue*)
+      printf 'Philips Hue / smart home bridge candidate\nConfidence: medium\nReason: Hue marker\n'
+      ;;
+    *)
+      printf 'Unknown / generic network device\nConfidence: low\nReason: no specific fingerprint matched; raw data below is authoritative\n'
+      ;;
+  esac
+}
+
+if [[ "${1:-}" == "__hint" ]]; then
+  shift
+  device_hint "$@"
+  exit 0
+fi
 
 menu() {
   printf '%s\n' \
@@ -15,71 +90,289 @@ menu() {
     "LAN Hosts via ARP"
 }
 
+# Discovers one Avahi service type and returns one row per logical service.
+# Output fields are TAB-separated:
+#   host, ipv4, ipv6, port, service_label, service_name, service_type, txt, interface, protocol, domain
+avahi_service_rows() {
+  local type="$1"
+  local label="$2"
+
+  avahi-browse -rt "$type" 2>/dev/null \
+    | awk -v service_type="$type" -v service_label="$label" '
+      function clean(value) {
+        gsub(/\[|\]/, "", value)
+        return value
+      }
+
+      function reset() {
+        iface=""; proto=""; name=""; domain=""; host=""; addr=""; port=""; txt="-"
+      }
+
+      # A new Avahi result starts here. Example:
+      # = eth0 IPv4 My Share _smb._tcp local
+      /^=/ {
+        iface=$2
+        proto=$3
+        name=$4
+        domain=$6
+        host=""; addr=""; port=""; txt="-"
+      }
+
+      /hostname =/ { host=clean($3) }
+      /address =/  { addr=clean($3) }
+      /txt =/ {
+        txt=$0
+        sub(/^.*txt = /, "", txt)
+        gsub(/\[|\]/, "", txt)
+        if (txt == "") txt="-"
+      }
+
+      /port =/ {
+        port=clean($3)
+        if (host == "") host="unknown"
+        if (domain == "") domain="local"
+        if (addr != "") {
+          print host "\t" addr "\t" port "\t" service_label "\t" name "\t" service_type "\t" txt "\t" iface "\t" proto "\t" domain
+        }
+      }
+    ' \
+    | awk -F'\t' '
+      {
+        host=$1
+        addr=$2
+        port=$3
+        label=$4
+        name=$5
+        type=$6
+        txt=$7
+        iface=$8
+        proto=$9
+        domain=$10
+
+        key=host "\t" port "\t" label "\t" name "\t" type
+        hosts[key]=host
+        ports[key]=port
+        labels[key]=label
+        names[key]=name
+        types[key]=type
+        txts[key]=txt
+        ifaces[key]=iface
+        domains[key]=domain
+
+        if (protos[key] == "") protos[key]=proto
+        else if (index("," protos[key] ",", "," proto ",") == 0) protos[key]=protos[key] ", " proto
+
+        if (addr ~ /^[0-9]+\./) {
+          if (ipv4[key] == "") ipv4[key]=addr
+          else if (index("," ipv4[key] ",", "," addr ",") == 0) ipv4[key]=ipv4[key] ", " addr
+        } else if (addr ~ /:/) {
+          if (ipv6[key] == "") ipv6[key]=addr
+          else if (index("," ipv6[key] ",", "," addr ",") == 0) ipv6[key]=ipv6[key] ", " addr
+        }
+      }
+      END {
+        for (key in hosts) {
+          printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", \
+            hosts[key], \
+            (ipv4[key] == "" ? "-" : ipv4[key]), \
+            (ipv6[key] == "" ? "-" : ipv6[key]), \
+            ports[key], \
+            labels[key], \
+            names[key], \
+            types[key], \
+            (txts[key] == "" ? "-" : txts[key]), \
+            ifaces[key], \
+            protos[key], \
+            domains[key]
+        }
+      }
+    ' \
+    | sort -u
+}
+
+# Discovers all Avahi services and returns normalized, previewable rows.
+# Output fields are TAB-separated:
+#   host, ipv4, ipv6, port, service_label, service_name, service_type, txt, interface, protocol, domain
+all_avahi_service_rows() {
+  avahi-browse -art 2>/dev/null \
+    | awk '
+      function clean(value) {
+        gsub(/\[|\]/, "", value)
+        return value
+      }
+
+      /^=/ {
+        iface=$2
+        proto=$3
+        name=$4
+        type=$5
+        domain=$6
+        host=""; addr=""; port=""; txt="-"
+      }
+
+      /hostname =/ { host=clean($3) }
+      /address =/  { addr=clean($3) }
+      /txt =/ {
+        txt=$0
+        sub(/^.*txt = /, "", txt)
+        gsub(/\[|\]/, "", txt)
+        if (txt == "") txt="-"
+      }
+
+      /port =/ {
+        port=clean($3)
+        if (host == "") host="unknown"
+        if (domain == "") domain="local"
+        if (addr != "") {
+          print host "\t" addr "\t" port "\t" type "\t" name "\t" type "\t" txt "\t" iface "\t" proto "\t" domain
+        }
+      }
+    ' \
+    | awk -F'\t' '
+      {
+        host=$1
+        addr=$2
+        port=$3
+        label=$4
+        name=$5
+        type=$6
+        txt=$7
+        iface=$8
+        proto=$9
+        domain=$10
+
+        key=host "\t" port "\t" label "\t" name "\t" type
+        hosts[key]=host
+        ports[key]=port
+        labels[key]=label
+        names[key]=name
+        types[key]=type
+        txts[key]=txt
+        ifaces[key]=iface
+        domains[key]=domain
+
+        if (protos[key] == "") protos[key]=proto
+        else if (index("," protos[key] ",", "," proto ",") == 0) protos[key]=protos[key] ", " proto
+
+        if (addr ~ /^[0-9]+\./) {
+          if (ipv4[key] == "") ipv4[key]=addr
+          else if (index("," ipv4[key] ",", "," addr ",") == 0) ipv4[key]=ipv4[key] ", " addr
+        } else if (addr ~ /:/) {
+          if (ipv6[key] == "") ipv6[key]=addr
+          else if (index("," ipv6[key] ",", "," addr ",") == 0) ipv6[key]=ipv6[key] ", " addr
+        }
+      }
+      END {
+        for (key in hosts) {
+          printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", \
+            hosts[key], \
+            (ipv4[key] == "" ? "-" : ipv4[key]), \
+            (ipv6[key] == "" ? "-" : ipv6[key]), \
+            ports[key], \
+            labels[key], \
+            names[key], \
+            types[key], \
+            (txts[key] == "" ? "-" : txts[key]), \
+            ifaces[key], \
+            protos[key], \
+            domains[key]
+        }
+      }
+    ' \
+    | sort -u
+}
+
+select_avahi_service() {
+  local type="$1"
+  local label="$2"
+  local self
+  self="$(script_path)"
+
+  avahi_service_rows "$type" "$label" \
+    | fzf \
+        --delimiter='\t' \
+        --with-nth='Host: {1} | IPv4: {2} | IPv6: {3} | Port: {4} | Service: {5}' \
+        --prompt="Select ${label} service: " \
+        --preview='printf "Host:      %s\nIPv4:      %s\nIPv6:      %s\nPort:      %s\nService:   %s\nName:      %s\nType:      %s\nTXT:       %s\nInterface: %s\nProtocol:  %s\nDomain:    %s\n\nDevice Hint:\n" {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}; "'"$self"'" __hint {1} "" {5} {6} {7} {8}'
+}
+
 browse_avahi_type() {
   local type="$1"
-  local action="${2:-details}"
+  local label="$2"
+  local action="${3:-details}"
 
   local selected
-  selected="$(
-    avahi-browse -rt "$type" 2>/dev/null \
-      | awk '
-        /^=/ { name=$4; service=$5; proto=$6; domain=$7 }
-        /hostname =/ { host=$3; gsub(/\[|\]/,"",host) }
-        /address =/ { addr=$3; gsub(/\[|\]/,"",addr) }
-        /port =/ { port=$3; gsub(/\[|\]/,"",port) }
-        /txt =/ { txt=$0 }
-        /port =/ {
-          printf "%-18s %-16s %-8s %s\n", addr, host, port, name
-        }
-      ' \
-      | sort -u \
-      | fzf --prompt="Select service: "
-  )"
-
+  selected="$(select_avahi_service "$type" "$label")"
   [[ -z "${selected:-}" ]] && exit 0
 
-  local ip host port name
-  ip="$(awk '{print $1}' <<< "$selected")"
-  host="$(awk '{print $2}' <<< "$selected")"
-  port="$(awk '{print $3}' <<< "$selected")"
-  name="$(cut -d' ' -f4- <<< "$selected")"
+  local host ipv4 ipv6 port service name service_type txt iface proto domain
+  IFS=$'\t' read -r host ipv4 ipv6 port service name service_type txt iface proto domain <<< "$selected"
+
+  # Prefer hostname, then IPv4, then IPv6. IPv6 URLs need brackets.
+  local target="$host"
+  [[ "$target" == "unknown" || -z "$target" ]] && target="$ipv4"
+  [[ "$target" == "-" || -z "$target" ]] && target="[$ipv6]"
 
   case "$action" in
     smb)
-      gio mount "smb://${host:-$ip}" || gio mount "smb://${ip}"
+      gio mount "smb://${target}" || gio mount "smb://${ipv4}"
       yazi "/run/user/$UID/gvfs/"
       ;;
     ssh)
-      exec kitty ssh "${host:-$ip}"
+      exec kitty ssh "$target"
       ;;
     ftp)
-      gio mount "ftp://${host:-$ip}:${port}"
+      gio mount "ftp://${target}:${port}"
       yazi "/run/user/$UID/gvfs/"
       ;;
     http)
-      xdg-open "http://${host:-$ip}:${port}" >/dev/null 2>&1 &
+      xdg-open "http://${target}:${port}" >/dev/null 2>&1 &
       ;;
     details|*)
-      printf '\nIP:   %s\nHost: %s\nPort: %s\nName: %s\n\n' "$ip" "$host" "$port" "$name"
+      printf '\nHost: %s\nIPv4: %s\nIPv6: %s\nPort: %s\nService: %s\nName: %s\nType: %s\nTXT: %s\nInterface: %s\nProtocol: %s\nDomain: %s\n\n' \
+        "$host" "$ipv4" "$ipv6" "$port" "$service" "$name" "$service_type" "$txt" "$iface" "$proto" "$domain"
       read -rp "Press Enter to close..."
       ;;
   esac
 }
 
+show_all_avahi_services() {
+  local self
+  self="$(script_path)"
+
+  all_avahi_service_rows \
+    | fzf \
+        --delimiter='\t' \
+        --with-nth='Host: {1} | IPv4: {2} | IPv6: {3} | Port: {4} | Service: {5}' \
+        --prompt="All Avahi services: " \
+        --preview='printf "Host:      %s\nIPv4:      %s\nIPv6:      %s\nPort:      %s\nService:   %s\nName:      %s\nType:      %s\nTXT:       %s\nInterface: %s\nProtocol:  %s\nDomain:    %s\n\nDevice Hint:\n" {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}; "'"$self"'" __hint {1} "" {5} {6} {7} {8}; printf "\nUseful service clues:\n- _googlecast._tcp: Chromecast / Nest / Google TV.\n- _airplay._tcp / _raop._tcp: Apple media targets.\n- _ipp._tcp / _printer._tcp: printers.\n- _workstation._tcp: generic host announcement.\n- _smb._tcp / _nfs._tcp: file sharing.\n"'
+}
+
 show_interfaces() {
-  ip -br addr | fzf --prompt="Network interfaces: " --preview 'ip addr show {1}'
+  ip -br addr \
+    | fzf \
+        --prompt="Network interfaces: " \
+        --preview='printf "Interface summary:\n"; echo {}; printf "\nAddresses and flags:\n"; ip addr show {1}; printf "\nRoutes using this interface:\n"; ip route show dev {1} 2>/dev/null; printf "\nIPv6 routes using this interface:\n"; ip -6 route show dev {1} 2>/dev/null'
 }
 
 lan_hosts() {
-  local iface
+  local iface self
   iface="$(ip route | awk '/default/ {print $5; exit}')"
+  self="$(script_path)"
 
   if command -v arp-scan >/dev/null 2>&1; then
     sudo arp-scan --localnet --interface="$iface" \
-      | awk '/^[0-9]+\./ {print $1 "  " $2 "  " substr($0, index($0,$3))}' \
-      | fzf --prompt="LAN hosts: "
+      | awk '/^[0-9]+\./ {print $1 "\t" $2 "\t" substr($0, index($0,$3))}' \
+      | fzf \
+          --delimiter='\t' \
+          --with-nth='IPv4: {1} | MAC: {2} | Vendor: {3}' \
+          --prompt="LAN hosts via ARP: " \
+          --preview='printf "IPv4:      %s\nMAC:       %s\nVendor:    %s\nInterface: %s\n\nDevice Hint:\n" {1} {2} {3} "'"$iface"'"; "'"$self"'" __hint "" {3} "" "" "" ""; printf "\n"; if command -v nmap >/dev/null 2>&1; then printf "Quick port hint:\n"; nmap -Pn --top-ports 20 {1} 2>/dev/null | sed -n "/PORT/,$p"; else printf "Install nmap for optional port hints.\n"; fi'
   else
-    ip neigh | fzf --prompt="LAN neighbors: "
+    ip neigh \
+      | fzf \
+          --prompt="LAN neighbors: " \
+          --preview='printf "Neighbor entry:\n"; echo {}; printf "\nTip:\nInstall arp-scan for cleaner host/vendor discovery.\n"'
   fi
 }
 
@@ -87,19 +380,19 @@ choice="$(menu | fzf --prompt="netbrowse: ")"
 
 case "$choice" in
   "SMB Shares / Hosts")
-    browse_avahi_type "_smb._tcp" "smb"
+    browse_avahi_type "_smb._tcp" "SMB" "smb"
     ;;
   "SSH Hosts")
-    browse_avahi_type "_ssh._tcp" "ssh"
+    browse_avahi_type "_ssh._tcp" "SSH" "ssh"
     ;;
   "FTP Hosts")
-    browse_avahi_type "_ftp._tcp" "ftp"
+    browse_avahi_type "_ftp._tcp" "FTP" "ftp"
     ;;
   "HTTP Services")
-    browse_avahi_type "_http._tcp" "http"
+    browse_avahi_type "_http._tcp" "HTTP" "http"
     ;;
   "All Avahi Services")
-    avahi-browse -art | fzf --prompt="All Avahi services: "
+    show_all_avahi_services
     ;;
   "Network Interfaces")
     show_interfaces

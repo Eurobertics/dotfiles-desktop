@@ -86,6 +86,7 @@
         "format-disconnected": "\udb80\udf19",
         "tooltip-format-ethernet": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}",
         "tooltip-format-wifi": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\nNetwork: {essid}\nSignal: {signalStrength}%",
+        "on-click": "kitty netbrowse",
         "on-click-right": "kitty nmtui"
     },
 
