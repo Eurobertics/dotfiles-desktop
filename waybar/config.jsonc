@@ -67,6 +67,7 @@
         "interval": "once",
         "signal": 1,
         "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle && pkill -RTMIN+1 waybar",
+        "on-click-right": "kitty alsamixer --view=catpture",
         "tooltip": true
     },
 
@@ -74,6 +75,7 @@
         "format": "{icon} {volume}%",
         "format-muted": "\ueee8",
         "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click-right": "kitty alsamixer --view=playback",
         "max-volume": 100,
         "format-icons": ["\uf026", "\uf027", "\uf028"]
     },
@@ -83,7 +85,8 @@
         "format-ethernet": "\udb80\ude00",
         "format-disconnected": "\udb80\udf19",
         "tooltip-format-ethernet": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}",
-        "tooltip-format-wifi": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\nNetwork: {essid}\nSignal: {signalStrength}%"
+        "tooltip-format-wifi": "Interface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\nNetwork: {essid}\nSignal: {signalStrength}%",
+        "on-click-right": "kitty nmtui"
     },
 
     "battery": {
@@ -99,7 +102,8 @@
     "clock": {
         "format": "{:%d.%m.%Y %H:%M}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "on-click": "kitty ikhal"
+        "on-click": "kitty ikhal",
+        "on-click-right": "kitty neomutt"
     },
 
     "tray": {
