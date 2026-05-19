@@ -57,8 +57,12 @@ echo " [ok] Kitty"
 # Fish
 # ==================
 mkdir -p "$HOME/.config/fish"
+mkdir -p "$HOME/.config/fish/conf.d"
+mkdir -p "$HOME/.config/fish/functions"
 rm -f "$HOME/.config/fish/config.fish"
 ln -sf "$DOTFILES/fish/config.fish" "$HOME/.config/fish/config.fish"
+ln -sf "$DOTFILES/fish/conf.d/fish_colors.fish" "$HOME/.config/fish/conf.d/fish_colors.fish"
+ln -sf "$DOTFILES/fish/functions/fish_prompt.fish" "$HOME/.config/fish/functions/fish_prompt.fish"
 echo " [ok] Fish"
 
 # ==================

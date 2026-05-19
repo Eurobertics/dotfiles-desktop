@@ -13,6 +13,12 @@ alias gpu-gaming='sudo envycontrol -s nvidia && sudo reboot'
 
 alias update='sudo pacman -Syu && flatpak update'
 
+# SteamVR Realtime-Priorität Fix (nach Updates wiederholen)
+alias steamvr-fix='sudo setcap CAP_SYS_NICE+eip ~/.local/share/Steam/steamapps/common/SteamVR/bin/linux64/vrcompositor-launcher && echo "SteamVR fix applied"'
+
+# Fix fuer Line-Out
+alias fix-lineout='amixer -c 0 cset numid=6 70,70'
+
 function extract                                                          
     switch $argv[1]                                                       
         case "*.tar.gz"   ; tar xzf $argv[1]                              

@@ -37,7 +37,7 @@
         //"exec": "playerctl -p tidal-hifi metadata --format '{{artist}} - {{title}}' 2>/dev/null || echo 'Kein Titel'",
         "interval": 1,
         "on-click": "playerctl -p tidal-hifi play-pause",
-        "on-click-right": "com.mastermindzh.tidal-hifi",
+        "on-click-right": "/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=com.mastermindzh.tidal-hifi com.mastermindzh.tidal-hifi",
         "on-scroll-up": "playerctl -p tidal-hifi next",
         "on-scroll-down": "playerctl -p tidal-hifi previous",
         "max-length": 50

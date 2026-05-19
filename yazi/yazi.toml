@@ -9,6 +9,8 @@ open = [
   { run = 'mpv "$@"',      desc = "mpv",       mime = "video/*" },
   { run = 'mpv "$@"',      desc = "mpv",       mime = "audio/*" },
   { run = 'nvim "$@"',     desc = "nvim",      mime = "text/*" },
+  { run = 'brave "$@"',     desc = "Brave Browser", mime = "text/*" },
+  { run = 'gimp "$@"',     desc = "GIMP", mime = "image/*" },
 ]
 [[plugin.prepend_previewers]]
 url = "*.md"
