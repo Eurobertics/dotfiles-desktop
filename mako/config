@@ -17,3 +17,5 @@ background-color=#1a0a0aee
 border-color=#f87171
 text-color=#f87171
 
+[app-name=khal]
+default-timeout=0

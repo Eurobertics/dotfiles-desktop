@@ -4,3 +4,4 @@ Description=vdirsyncer sync
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/vdirsyncer sync
+ExecStartPost=%h/.local/bin/khal-alarm.py

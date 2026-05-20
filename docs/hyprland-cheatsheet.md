@@ -90,8 +90,10 @@
 |---|---|
 | `SUPER + 1–0` | Workspace 1–10 wechseln |
 | `SUPER + SHIFT + 1–0` | Aktives Fenster zu Workspace 1–10 schieben |
+| `SUPER + CTRL + 1–0` | Aktives Fenster zu Workspace 1–10 schieben ohne Ansicht zu wechslen |
 | `SUPER + S` | Scratchpad ein-/ausblenden (special:magic) |
 | `SUPER + SHIFT + S` | Aktives Fenster ins Scratchpad schieben |
+| `SUPER + CTRL + S` | Aktives Fenster ins Scratchpad schieben ohne Scratchpad zu öffnen |
 
 > Das Scratchpad (`special:magic`) ist ideal für ein dauerhaft bereitstehendes Terminal – `SUPER + S` lässt es über dem Desktop erscheinen und verschwinden wie eine Quake-Console.
 
