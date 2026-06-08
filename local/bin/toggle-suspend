@@ -1,0 +1,48 @@
+#!/bin/bash
+LOCK_FILE="/tmp/suspend-inhibit.pid"
+
+is_active() {
+    [ -f "$LOCK_FILE" ] && kill -0 "$(cat "$LOCK_FILE")" 2>/dev/null
+}
+
+do_start() {
+    if is_active; then
+        echo "Inhibitor bereits aktiv (PID $(cat "$LOCK_FILE"))"
+        exit 0
+    fi
+    systemd-inhibit --what=sleep --who="Manuell" --why="Suspend deaktiviert" sleep infinity &
+    echo $! > "$LOCK_FILE"
+    notify-send "Suspend" "Energiesparmodus deaktiviert" -i battery-caution
+    echo "Inhibitor gestartet (PID $!)"
+}
+
+do_stop() {
+    if ! is_active; then
+        echo "Kein aktiver Inhibitor"
+        exit 0
+    fi
+    kill "$(cat "$LOCK_FILE")"
+    rm "$LOCK_FILE"
+    notify-send "Suspend" "Energiesparmodus wieder aktiv" -i battery
+    echo "Inhibitor gestoppt"
+}
+
+do_status() {
+    if is_active; then
+        echo "Status: AKTIV (Suspend blockiert, PID $(cat "$LOCK_FILE"))"
+    else
+        echo "Status: INAKTIV (Suspend normal)"
+    fi
+}
+
+case "$1" in
+    start)   do_start ;;
+    stop)    do_stop ;;
+    toggle)  is_active && do_stop || do_start ;;
+    status|"") do_status ;;
+    *)
+        echo "Verwendung: $(basename "$0") [start|stop|toggle|status]"
+        exit 1
+        ;;
+esac
+

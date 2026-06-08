@@ -29,3 +29,6 @@ function extract
         case "*"          ; echo "Unbekanntes Format"                     
     end                                                                   
 end
+
+fnm env --use-on-cd | source
+
